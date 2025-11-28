@@ -1,25 +1,24 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const router = useRouter();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // if (!username || !password) {
-        //     setError('Both fields are required');
-        //     return;
-        // }
-        // // Handle login logic here
-        // console.log('Logging in with:', { username, password });
-        // setError('');
+        if (!email || !password) {
+            setError('Both fields are required');
+            return;
+        }
 
         axios.post('/api/login', { email, password }).
             then((response) => {
-
+                router.push('/u/dashboard');
             }).catch((error) => {
                 setError(error.response?.data?.message || 'An error occurred');
             });
