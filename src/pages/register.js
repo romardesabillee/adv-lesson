@@ -2,37 +2,48 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import Link from 'next/link';
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleSubmit = (e) => {
+    function handleSubmit (e) {
         e.preventDefault();
-        // if (!username || !password) {
-        //     setError('Both fields are required');
-        //     return;
-        // }
-        // // Handle login logic here
-        // console.log('Logging in with:', { username, password });
-        // setError('');
+        setError('');
+        setSuccess('');
+        if (!email || !password) {
+            setError('Both fields are required');
+            return;
+        }
 
-        axios.post('/api/login', { email, password }).
-            then((response) => {
-
-            }).catch((error) => {
-                setError(error.response?.data?.message || 'An error occurred');
+        axios.post('/api/register', { email, password })
+            .then(res => {
+                if (res.data.success) {
+                    setSuccess('Registration successful!');
+                    setEmail('');
+                    setPassword('');
+                } else {
+                    setError(res.data.message || 'Registration failed');
+                }
+            })
+            .catch((e) => {
+                console.log(e);
+                setError(e.response?.data?.message || 'Registration failed');
             });
-    };
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <form
                 onSubmit={handleSubmit}
                 className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-                <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+                <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
                 {error && (
                     <p className="mb-4 text-red-500 text-sm text-center">{error}</p>
+                )}
+                {success && (
+                    <p className="mb-4 text-green-500 text-sm text-center">{success}</p>
                 )}
                 <div className="mb-4">
                     <label
@@ -42,7 +53,7 @@ const LoginForm = () => {
                         Email
                     </label>
                     <input
-                        type="text"
+                        type="email"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -66,13 +77,13 @@ const LoginForm = () => {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
                 >
-                    Login
+                    Register
                 </button>
                 <div className="mt-4 text-center">
-                    <Link href="/register">
-                        <span className="text-blue-600 hover:underline">Don't have an account? Register</span>
+                    <Link href="/">
+                        <span className="text-blue-600 hover:underline">Go to Login</span>
                     </Link>
                 </div>
             </form>
@@ -80,4 +91,4 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default RegisterForm;
