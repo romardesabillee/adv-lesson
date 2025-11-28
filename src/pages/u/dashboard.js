@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -9,9 +9,8 @@ const Dashboard = () => {
 
     function fetchTodos () {
         axios.get('/api/todos').then(res => {
-            console.log(res.data);
             setTodos(res.data);
-        });
+        }).catch((error) => {});
     }
 
     useEffect(() => {

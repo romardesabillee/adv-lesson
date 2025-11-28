@@ -1,6 +1,8 @@
 import { query } from "@/helpers/dbconnection";
+import { isAuthenticated } from "@/helpers/isAuthenticated";
 
 export default async function handler(req, res) {
+
     switch (req.method) {
         case "GET":
             await getTodos(req, res);

@@ -2,26 +2,34 @@ import { query } from "@/helpers/dbconnection";
 
 export async function isAuthenticated(req, res) {
     const token = req.cookies.token;
-    const expiredDate = new Date(0).toUTCString();
 
     if (!token) {
-        res.setHeader('Set-Cookie', `token=; Path=/; Expires=${expiredDate}; HttpOnly; SameSite=Strict`);
-        res.writeHead(302, { Location: '/login' });
-        res.end();
-        return null;
+        return redirectToLogin(res);
     }
 
-    const user = await query(
-        "SELECT * FROM users WHERE token = ? AND token_expiration > NOW()",
+    // // is token exist
+    const [user] = await query(
+        "SELECT * FROM users WHERE token = ?",
         [token]
     );
+    if (user.length === 0) 
+        return expired(res);
 
-    if (!user || (Array.isArray(user) && user.length === 0)) {
-        res.setHeader('Set-Cookie', `token=; Path=/; Expires=${expiredDate}; HttpOnly; SameSite=Strict`);
-        res.writeHead(302, { Location: '/login' });
-        res.end();
-        return null;
-    }
+    // is expired
+    const [row] = await query(
+        "SELECT * FROM users WHERE token = ? AND NOW() > token_expiration",
+        [token]
+    );
+    console.log('test');
+    if (row.length) 
+        return expired(res);
 
-    return user;
+    return user[0];
+}
+
+function expired(res) {
+    const expiredDate = new Date(0).toUTCString();
+    res.setHeader('Set-Cookie', `token=; Path=/; Expires=${expiredDate}; HttpOnly; SameSite=Strict`);
+    res.status(401).json({ message: "Session expired. Please log in again." });
+    return null;
 }

@@ -29,18 +29,14 @@ export default async function handler(req, res) {
     }
 
     const token = await generateUniqueToken();
-    const oneDay = 24 * 60 * 60 * 1000;
-    const expiresDate = new Date(Date.now() + oneDay);
-    const expires = expiresDate.toUTCString();
-
     await query(
-        "UPDATE users SET token = ?, token_expiration = ? WHERE email = ?",
-        [token, expiresDate, email]
+        "UPDATE users SET token = ?, token_expiration = NOW() + INTERVAL 1 DAY WHERE email = ?",
+        [token, email]
     );
 
     res.setHeader(
         'Set-Cookie',
-        `token=${token}; Path=/; Expires=${expires}; HttpOnly; SameSite=Strict`
+        `token=${token}; Path=/; expires=${new Date(Date.now() + 24 * 60 * 60 * 1000).toUTCString()}; HttpOnly; SameSite=Strict`
     );
 
     res.status(200).json({ message: 'Login successful' });
